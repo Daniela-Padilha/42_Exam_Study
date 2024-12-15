@@ -1,4 +1,4 @@
-Assignment name  : fizzbuzz
+/* Assignment name  : fizzbuzz
 Expected files   : fizzbuzz.c
 Allowed functions: write
 --------------------------------------------------------------------------------
@@ -36,5 +36,39 @@ fizzbuzz
 fizz
 buzz
 $> 
+*/
 
+#include <unistd.h>
+
+int  main(void)
+{
+  int i = 1;
+  int r;
+  int l;
+
+  while (i <=100)
+  {
+   	if (i % 3 == 0 && i % 5 == 0)
+		write(1, "fizzbuzz", 8);
+    else if (i % 3 == 0)
+      write(1, "fizz", 4);
+    else if (i % 5 == 0)
+      write(1, "buzz", 4);
+    else if (i >= 10)
+	{
+		r = i % 10 + '0';
+		l = i /10 + '0';
+		write(1, &l, 1);
+		write(1, &r, 1);
+	}
+	else
+	{
+		r = i +'0';
+		write(1, &r, 1);
+	}
+    write(1, "\n", 1);
+    i++;
+  }
+  return (0); 
+}
   
