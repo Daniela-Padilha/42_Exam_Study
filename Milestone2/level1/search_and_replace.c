@@ -25,3 +25,33 @@ $>./search_and_replace "ZoZ eT Dovid oiME le METol." "o" "a" | cat -e
 ZaZ eT David aiME le METal.$
 $>./search_and_replace "wNcOre Un ExEmPle Pas Facilw a Ecrirw " "w" "e" | cat -e
 eNcOre Un ExEmPle Pas Facile a Ecrire $*/
+
+#include <unistd.h>
+
+int	main(int ac, char **av)
+{
+	int	i;
+
+	while (av[2][i])
+		i++;
+	if (ac == 4 && i == 1)
+	{
+		i = 0;
+		while (av[1][i])
+		{
+			if (av[1][i] == av[2][0])
+			{
+				av[1][i] = av[3][0];
+				write (1, &av[1][i], 1);
+				i++;
+			}
+			else
+			{
+				write (1, &av[1][i], 1);
+				i++;
+			}
+		}
+	}
+	write(1, "\n", 1);
+	return (0);
+}
