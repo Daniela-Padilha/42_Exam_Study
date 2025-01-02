@@ -1,19 +1,25 @@
-/* Assignment name  : paramsum
-Expected files   : paramsum.c
-Allowed functions: write
+/* Assignment name  : pgcd
+Expected files   : pgcd.c
+Allowed functions: printf, atoi, malloc, free
 --------------------------------------------------------------------------------
 
-Write a program that displays the number of arguments passed to it, followed by
-a newline.
+Write a program that takes two strings representing two strictly positive
+integers that fit in an int.
 
-If there are no arguments, just display a 0 followed by a newline.
+Display their highest common denominator followed by a newline (It's always a
+strictly positive integer).
 
-Example:
+If the number of parameters is not 2, display a newline.
 
-$>./paramsum 1 2 3 5 7 24
-6
-$>./paramsum 6 12 24 | cat -e
-3$
-$>./paramsum | cat -e
-0$
-$>*/
+Examples:
+
+$> ./pgcd 42 10 | cat -e
+2$
+$> ./pgcd 42 12 | cat -e
+6$
+$> ./pgcd 14 77 | cat -e
+7$
+$> ./pgcd 17 3 | cat -e
+1$
+$> ./pgcd | cat -e
+$ */
