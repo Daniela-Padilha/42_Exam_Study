@@ -26,3 +26,23 @@ If at least one integer is null, LCM is equal to 0.
 Your function must be prototyped as follows:
 
   unsigned int    lcm(unsigned int a, unsigned int b); */
+
+
+unsigned int lcm(unsigned int a, unsigned int b)
+{
+	unsigned int n = 0;
+
+	if (!a || !b)
+		return(n);
+	if (a > b)
+		n = a;
+	else
+		n = b;
+	while (1)
+	{
+		if (n % a == 0 && n % b == 0)
+			return(n);
+		n++;
+	}
+	
+}
