@@ -19,3 +19,8 @@ _____________
      / \
  0001 | 0100
 */
+
+unsigned char swap_bits(unsigned char octect)
+{
+	return ((octect >> 4) | (octect << 4));
+}
