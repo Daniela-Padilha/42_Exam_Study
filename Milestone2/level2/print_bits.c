@@ -16,7 +16,7 @@ Example, if you pass 2 to print_bits, it will print "00000010" */
 #include <unistd.h>
 void print_bits(unsigned char octect)
 {
-  int i = 8;
+  int i = 7;
   unsigned char bit;
 
   while (i > 0)
