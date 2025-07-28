@@ -1,5 +1,9 @@
-Here are my resolutions of some of the possible exercises for each exame of the Common Core.
+# Exam Study
 
-This repository is simply to show my study process for the exams.
+✨ Here you'll find my solutions to some of the exercises that may appear on Common Core exams. ✨
 
-It does not contain a complete list of all possible exam exercises.
+📚 This repository serves as a record of my study process and exam preparation.
+
+⚠️ Please note:  
+- This is **not** a comprehensive collection of all possible exam exercises.  
+- The content reflects my personal approach and practice; it may not cover every topic or variant found in the exams.
