@@ -6,7 +6,7 @@
 /*   By: ddo-carm <ddo-carm@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 23:15:49 by ddo-carm          #+#    #+#             */
-/*   Updated: 2025/08/13 18:01:17 by ddo-carm         ###   ########.fr       */
+/*   Updated: 2025/08/13 18:43:36 by ddo-carm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,17 +27,21 @@ int picoshell(char **cmds[])
 	int		prev_read = -1;
 	int		i = 0;
 
+	if (!cmds)
+		return (1);
 	while (cmds[i])
 	{
 		if (cmds[i + 1])
 		{
 			if (pipe(pipefd) == -1)
 			{
+				cleanup(pipefd[0]);
+				cleanup(pipefd[1]);
 				cleanup(prev_read);
 				return (1);
 			}
 		}
-		else if (!cmds[i + 1])
+		else
 		{
 			pipefd[0] = -1;
 			pipefd[1] = -1;
@@ -70,6 +74,8 @@ int picoshell(char **cmds[])
 	while (wait(NULL) != -1)
 		;
 	cleanup(prev_read);
+	cleanup(pipefd[0]);
+	cleanup(pipefd[1]);
 	return (0);
 }
 
