@@ -3,22 +3,40 @@
 /*                                                        :::      ::::::::   */
 /*   vbc.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ddo-carm <ddo-carm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ddo-carm <ddo-carm@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 21:50:25 by ddo-carm          #+#    #+#             */
-/*   Updated: 2025/08/19 18:06:10 by ddo-carm         ###   ########.fr       */
+/*   Updated: 2025/08/19 22:50:47 by ddo-carm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "vbc.h"
+#include "vbc.h"
 
-node    *new_node(node n)
+int g_index = 0;
+
+node    *new_node(char value)
 {
-    node *ret = calloc(1, sizeof(n));
-    if (!ret)
-        return (NULL);
-    *ret = n;
-    return (ret);
+    node *n = malloc(sizeof(node));
+    if (!n)
+		return (NULL);
+	n->l = NULL;
+	n->r = NULL;
+	if (value == '+')
+	{
+		n->type = ADD;
+		n->val = 0;
+	}
+	else if (value == '*')
+	{
+		n->type = MULTI;
+		n->val = 0;
+	}
+	else
+	{
+		n->type = VAL;
+		n->val = value -'0';
+	}
+    return (n);
 }
 
 void    destroy_tree(node *n)
@@ -114,57 +132,50 @@ int prev_check(char *s)
 	return 0;
 }
 
-// node    *parse_nbrs(char **s)
-// {
-// 	if (**s >= '0' && **s <= '9')
-//     {
-// 		node new;
-// 		new.type = VAL;
-// 		new.val = **s - '0';
-// 		new.l = NULL;
-// 		new.r = NULL;
-// 		(*s)++;
-// 		return (new_node(new));
-// 	}
-// 	else if (**s == '(')
-//     {
-// 		(*s)++;
-// 		node *in = parse_add(s);
-// 		if (!expect(s, ')'))
-// 		{
-// 			destroy_tree(in);
-// 			return NULL;
-// 		}
-// 		return in;
-// 	}
-// 	else
-//     {
-//         unexpected(**s);
-//         return NULL;
-//     }
-// }
+node    *parse_nbrs(char *s)
+{
+	if (s[g_index] == '(')
+	{
+		g_index++;
+		node *new = parse_add(s);
+		if (s[g_index] == ')')
+			g_index++;
+		return (new);
+	}
+	else if (isdigit(s[g_index]))
+	{
+		node *new = new_node(s[g_index]);
+		g_index++;
+		return (new);
+	}
+	return (NULL);
+}
 
-// node    *parse_multi(char **s)
-// {
+node    *parse_multi(char *s)
+{
+	node *curr = parse_nbrs(s);
+	while (s[g_index] == '*')
+	{
+		node *signal = new_node(s[g_index++]);
+		signal->r = parse_nbrs(s);
+		signal->l = curr;
+		curr = signal;
+	}
+	return (curr);
+}
 
-// }
-
-// node    *parse_add(char **s)
-// {
-//     node *new;
-// 	int i = 0;
-
-// 	while (s[i])
-// 	{
-// 		if (s[i] == '+')
-// 		{
-			
-// 		}
-// 		i++;
-// 	}
-
-
-// }
+node    *parse_add(char *s)
+{
+	node *curr = parse_multi(s);
+	while (s[g_index] == '+')
+	{
+		node *signal = new_node(s[g_index++]);
+		signal->r = parse_multi(s);
+		signal->l = curr;
+		curr = signal;
+	}
+	return (curr);
+}
 
 int eval_tree(node *tree)
 {
@@ -177,21 +188,19 @@ int eval_tree(node *tree)
         case VAL:
             return (tree->val);
     }
+	return (0);
 }
 
 int main(int argc, char **argv)
 {
-    int r;
-    
     if (argc != 2)
-        return (1);
-    r = prev_check(argv[1]);
-    if (r == 0)
-		printf("Correct\n");
-    // node *tree = parse_expr(argv[1]);
-    // if (!tree)
-    //     return (1);
-    // printf("%d\n", eval_tree(tree));
-    // destroy_tree(tree);
+		return (1);
+	if (prev_check(argv[1]) == -1)
+		return (1);
+    node *tree = parse_add(argv[1]);
+    if (!tree)
+		return (1);
+    printf("%d\n", eval_tree(tree));
+    destroy_tree(tree);
 	return (0);
 }
