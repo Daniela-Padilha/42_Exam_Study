@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   vbc.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ddo-carm <ddo-carm@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: ddo-carm <ddo-carm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 21:50:25 by ddo-carm          #+#    #+#             */
-/*   Updated: 2025/08/18 23:27:33 by ddo-carm         ###   ########.fr       */
+/*   Updated: 2025/08/19 18:06:10 by ddo-carm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,25 +41,25 @@ void    unexpected(char c)
         printf("Unexpected end of file\n");
 }
 
-int accept(char **s, char c)
-{
-    if (**s)
-    {
-        (*s)++;
-        return (1);
-    }
-    return (0);
-}
+// int accept(char **s, char c)
+// {
+//     if (**s)
+//     {
+//         (*s)++;
+//         return (1);
+//     }
+//     return (0);
+// }
 
-int expect(char **s, char c)
-{
-    if (accept(s, c))
-        return (1);
-    unexpected(**s);
-    return (0);
-}
+// int expect(char **s, char c)
+// {
+//     if (accept(s, c))
+//         return (1);
+//     unexpected(**s);
+//     return (0);
+// }
 
-int prev_check(char *s)
+int parenthesis(char *s)
 {
 	int open = 0;
 	int i = 0;
@@ -86,62 +86,85 @@ int prev_check(char *s)
 	}
 }
 
-node    *parse_nbrs(char **s)
+int prev_check(char *s)
 {
-	if (**s >= '0' && **s <= '9')
-    {
-		node new;
-		new.type = VAL;
-		new.val = **s - '0';
-		new.l = NULL;
-		new.r = NULL;
-		(*s)++;
-		return (new_node(new));
-	}
-	else if (**s == '(')
-    {
-		(*s)++;
-		node *in = parse_add(s);
-		if (!expect(s, ')'))
-		{
-			destroy_tree(in);
-			return NULL;
-		}
-		return in;
-	}
-	else
-    {
-        unexpected(**s);
-        return NULL;
-    }
-}
-
-node    *parse_multi(char **s)
-{
-
-}
-
-node    *parse_add(char **s)
-{
-    node *new;
 	int i = 0;
-
+	
+	if (parenthesis(s) == -1)
+		return -1;
 	while (s[i])
 	{
-		if (s[i] == '+')
+		if (i == 0 && (s[i] == '+' || s[i] == '*'))
+			return (printf("Unexpected token '%c'\n", s[i]), -1);
+		if ((s[i] == '+' || s[i] == '*') && !isdigit(s[i + 1]))
 		{
-			
+			if (s[i + 1] == '\0')
+				unexpected(0);
+			else
+				printf("Unexpected token '%c'\n", s[i]);
+			return -1;
 		}
+			
+		if ((s[i] == '+' || s[i] == '*') && !s[i + 1])
+			return (unexpected(0), -1);
+		if (isdigit(s[i]) && isdigit(s[i + 1]))
+			return (printf("Unexpected token '%c'\n", s[i + 1]), -1);
 		i++;
 	}
-
-    if (*s) 
-    {
-        destroy_tree(ret);
-        return (NULL);
-    }
-    return (ret);
+	return 0;
 }
+
+// node    *parse_nbrs(char **s)
+// {
+// 	if (**s >= '0' && **s <= '9')
+//     {
+// 		node new;
+// 		new.type = VAL;
+// 		new.val = **s - '0';
+// 		new.l = NULL;
+// 		new.r = NULL;
+// 		(*s)++;
+// 		return (new_node(new));
+// 	}
+// 	else if (**s == '(')
+//     {
+// 		(*s)++;
+// 		node *in = parse_add(s);
+// 		if (!expect(s, ')'))
+// 		{
+// 			destroy_tree(in);
+// 			return NULL;
+// 		}
+// 		return in;
+// 	}
+// 	else
+//     {
+//         unexpected(**s);
+//         return NULL;
+//     }
+// }
+
+// node    *parse_multi(char **s)
+// {
+
+// }
+
+// node    *parse_add(char **s)
+// {
+//     node *new;
+// 	int i = 0;
+
+// 	while (s[i])
+// 	{
+// 		if (s[i] == '+')
+// 		{
+			
+// 		}
+// 		i++;
+// 	}
+
+
+// }
 
 int eval_tree(node *tree)
 {
@@ -158,12 +181,17 @@ int eval_tree(node *tree)
 
 int main(int argc, char **argv)
 {
+    int r;
+    
     if (argc != 2)
         return (1);
-    node *tree = parse_expr(argv[1]);
-    if (!tree)
-        return (1);
-    printf("%d\n", eval_tree(tree));
-    destroy_tree(tree);
+    r = prev_check(argv[1]);
+    if (r == 0)
+		printf("Correct\n");
+    // node *tree = parse_expr(argv[1]);
+    // if (!tree)
+    //     return (1);
+    // printf("%d\n", eval_tree(tree));
+    // destroy_tree(tree);
 	return (0);
 }
