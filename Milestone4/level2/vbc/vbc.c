@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   vbc.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ddo-carm <ddo-carm@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: ddo-carm <ddo-carm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 21:50:25 by ddo-carm          #+#    #+#             */
-/*   Updated: 2025/08/19 22:50:47 by ddo-carm         ###   ########.fr       */
+/*   Updated: 2025/08/20 17:15:01 by ddo-carm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,24 +107,20 @@ int parenthesis(char *s)
 int prev_check(char *s)
 {
 	int i = 0;
-	
-	if (parenthesis(s) == -1)
+
+	if (parentesis(s) == -1)
 		return -1;
 	while (s[i])
 	{
 		if (i == 0 && (s[i] == '+' || s[i] == '*'))
 			return (printf("Unexpected token '%c'\n", s[i]), -1);
-		if ((s[i] == '+' || s[i] == '*') && !isdigit(s[i + 1]))
+		else if (s[i] == '+' || s[i] == '*')
 		{
-			if (s[i + 1] == '\0')
-				unexpected(0);
-			else
-				printf("Unexpected token '%c'\n", s[i]);
-			return -1;
+			if (!s[i + 1])
+				return (unexpected(0), -1);
+			else if (!isdigit(s[i + 1]))
+				return (printf("Unexpected token '%c'\n", s[i + 1]), -1);
 		}
-			
-		if ((s[i] == '+' || s[i] == '*') && !s[i + 1])
-			return (unexpected(0), -1);
 		if (isdigit(s[i]) && isdigit(s[i + 1]))
 			return (printf("Unexpected token '%c'\n", s[i + 1]), -1);
 		i++;
