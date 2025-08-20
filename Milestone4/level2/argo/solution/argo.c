@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   argo.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ddo-carm <ddo-carm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ddo-carm <ddo-carm@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 17:39:12 by ddo-carm          #+#    #+#             */
-/*   Updated: 2025/08/20 19:35:33 by ddo-carm         ###   ########.fr       */
+/*   Updated: 2025/08/20 22:56:11 by ddo-carm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,6 @@ int parse_str(json *dst, FILE *stream)
 	if (c != '"')
 	{
 		unexpected(stream);
-		free(dst->string);
 		return -1;
 	}
 	dst->string[len] = '\0';
@@ -106,7 +105,7 @@ int parse_map(json *dst, FILE *stream)
 			return -1;
 		pair *p = &dst->map.data[dst->map.size];
 		json s_key;
-		if (parse_string(&s_key, stream) != 1)
+		if (parse_str(&s_key, stream) != 1)
 			return -1;
 		p->key = s_key.string;
 		if (!expect(stream, ':'))
@@ -117,7 +116,7 @@ int parse_map(json *dst, FILE *stream)
 		if (!accept(stream, ','))
 			break ;
 	}
-	if (!except(stream, '}'))
+	if (!expect(stream, '}'))
 		return -1;
 	return 1;
 }
