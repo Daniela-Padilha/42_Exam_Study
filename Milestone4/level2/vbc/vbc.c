@@ -6,7 +6,7 @@
 /*   By: ddo-carm <ddo-carm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 21:50:25 by ddo-carm          #+#    #+#             */
-/*   Updated: 2025/08/20 17:15:01 by ddo-carm         ###   ########.fr       */
+/*   Updated: 2025/08/21 11:24:07 by ddo-carm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,28 +59,28 @@ void    unexpected(char c)
         printf("Unexpected end of file\n");
 }
 
-// int accept(char **s, char c)
-// {
-//     if (**s)
-//     {
-//         (*s)++;
-//         return (1);
-//     }
-//     return (0);
-// }
-
-// int expect(char **s, char c)
-// {
-//     if (accept(s, c))
-//         return (1);
-//     unexpected(**s);
-//     return (0);
-// }
-
-int parenthesis(char *s)
+int accept(char **s, char c)
 {
-	int open = 0;
+    if (**s)
+    {
+        (*s)++;
+        return (1);
+    }
+    return (0);
+}
+
+int expect(char **s, char c)
+{
+    if (accept(s, c))
+        return (1);
+    unexpected(**s);
+    return (0);
+}
+
+int prev_check(char *s)
+{
 	int i = 0;
+	int open = 0;
 
 	while (s[i])
 	{
@@ -88,6 +88,17 @@ int parenthesis(char *s)
 			open++;
 		else if (s[i] == ')')
 			open--;
+		if (i == 0 && (s[i] == '+' || s[i] == '*'))
+			return (printf("Unexpected token '%c'\n", s[i]), -1);
+		else if (s[i] == '+' || s[i] == '*')
+		{
+			if (!s[i + 1])
+				return (unexpected(0), -1);
+			else if (!isdigit(s[i + 1]) && !isdigit(s[i + 2]))
+				return (printf("Unexpected token '%c'\n", s[i + 1]), -1);
+		}
+		if (isdigit(s[i]) && isdigit(s[i + 1]))
+			return (printf("Unexpected token '%c'\n", s[i + 1]), -1);
 		i++;
 	}
 	if (open == 0)
@@ -101,29 +112,6 @@ int parenthesis(char *s)
 	{
 		unexpected(')');
 		return -1;
-	}
-}
-
-int prev_check(char *s)
-{
-	int i = 0;
-
-	if (parentesis(s) == -1)
-		return -1;
-	while (s[i])
-	{
-		if (i == 0 && (s[i] == '+' || s[i] == '*'))
-			return (printf("Unexpected token '%c'\n", s[i]), -1);
-		else if (s[i] == '+' || s[i] == '*')
-		{
-			if (!s[i + 1])
-				return (unexpected(0), -1);
-			else if (!isdigit(s[i + 1]))
-				return (printf("Unexpected token '%c'\n", s[i + 1]), -1);
-		}
-		if (isdigit(s[i]) && isdigit(s[i + 1]))
-			return (printf("Unexpected token '%c'\n", s[i + 1]), -1);
-		i++;
 	}
 	return 0;
 }
