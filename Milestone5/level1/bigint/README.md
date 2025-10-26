@@ -1,5 +1,7 @@
 Assignment name  : bigint
+
 Expected files   : bigint.hpp, bigint.cpp
+
 --------------------------------------------------------------------------------
 
 In computer science a bignum is an object representing an arbitrary precision
@@ -11,8 +13,9 @@ Create a class called bigint that will store an arbitrary precision unsigned
 integer.
 
 Your class must support addition, comparison and "digitshift" (like bitshift but
-instead of shifting the bits you will shift the digits in base 10, e.g.:
-(42 << 3 == 42000) and (1337 >> 2 == 13)).
+instead of shifting the bits you will shift the digits in base 10.
+
+e.g.: (42 << 3 == 42000) and (1337 >> 2 == 13)).
 
 Your bigint must be printable with the << operator (in base 10) and the output
 should not contain any leading zeros.
