@@ -1,9 +1,11 @@
 Assignment name  : polyset
+
 Expected files   : searchable_array_bag.cpp, searchable_array_bag.hpp,
 searchable_tree_bag.cpp, searchable_tree_bag.hpp, set.cpp, set.hpp
+
 --------------------------------------------------------------------------------
 
-you will find in this directory some classes:
+You will find in this directory some classes:
  - bag: an abstract class representing a bag
  - searchable_bag: an abstract class representing a bag with the ability to
  search in it.
