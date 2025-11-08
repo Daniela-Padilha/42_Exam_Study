@@ -6,7 +6,7 @@ class set {
 	private:
 		searchable_bag& _bag;
 	public:
-		set();
+		set() = delete;
 		set(searchable_bag& bag);
 		~set();
 		set(const set& other);

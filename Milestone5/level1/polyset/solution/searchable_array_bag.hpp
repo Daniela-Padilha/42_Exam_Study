@@ -3,7 +3,7 @@
 #include "given_files/array_bag.hpp"
 #include "given_files/searchable_bag.hpp"
 
-class searchable_array_bag: virtual public array_bag, virtual public searchable_bag {
+class searchable_array_bag: public array_bag, public searchable_bag {
 	public:
 		searchable_array_bag();
 		~searchable_array_bag();

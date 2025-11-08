@@ -4,14 +4,12 @@ searchable_tree_bag::searchable_tree_bag()
 {}
 searchable_tree_bag::~searchable_tree_bag()
 {}
-searchable_tree_bag::searchable_tree_bag(const searchable_tree_bag& other)
-{
-	*this = other;
-}
+searchable_tree_bag::searchable_tree_bag(const searchable_tree_bag& other): tree_bag(other) {}
+
 searchable_tree_bag& searchable_tree_bag::operator = (const searchable_tree_bag& other)
 {
 	if (this != &other)
-		*this = other;
+		tree_bag::operator=(other);
 	return (*this);
 }
 

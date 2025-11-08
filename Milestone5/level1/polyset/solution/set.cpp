@@ -1,13 +1,11 @@
 #include "set.hpp"
 
-set::set()
-{}
-set::~set()
-{}
-set::set(const set& other)
-{
-	*this = other;
-}
+set::set(searchable_bag& bag): _bag(bag) {}
+
+set::~set() {}
+
+set::set(const set& other): _bag(other._bag) {}
+
 set& set::operator = (const set& other)
 {
 	if (this != &other)
@@ -15,42 +13,37 @@ set& set::operator = (const set& other)
 	return (*this);
 }
 
-void set::insert(int)
+void set::insert(int val)
 {
-
+	if (!_bag.has(val))
+		_bag.insert(val);
 }
 
-void set::insert(int *, int)
+void set::insert(int *arr, int size)
 {
-
+	for (int i = 0; i < size; i++)
+	{
+		if (!_bag.has(arr[i]))
+			_bag.insert(arr[i]);
+	}
 }
 
 void set::print() const
 {
-
+	_bag.print();
 }
 
 void set::clear()
 {
-
+	_bag.clear();
 }
 
 bool set::has(int val) const
 {
-	node *n = tree;
-	while (n)
-	{
-		if (val == n->value)
-			return true;
-		if (val < n->value)
-			n = n->l;
-		else if (val >= n->value)
-			n = n->r;
-	}
-	return false;
+	return _bag.has(val);
 }
 
 const searchable_bag& set::get_bag() const
 {
-
+	return _bag;
 }

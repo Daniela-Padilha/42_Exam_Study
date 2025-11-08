@@ -1,8 +1,8 @@
-#include "searchable_tree_bag.hpp"
-#include "searchable_array_bag.hpp"
+#include "../searchable_tree_bag.hpp"
+#include "../searchable_array_bag.hpp"
 #include <cstdlib>
 #include <iostream>
-#include "set.hpp"
+#include "../set.hpp"
 
 int main(int ac, char **av)
 {
