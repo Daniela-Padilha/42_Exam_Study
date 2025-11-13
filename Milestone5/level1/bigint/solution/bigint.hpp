@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BIGINT_HPP
+#define BIGINT_HPP
 
 # include <iostream>
 # include <climits>
@@ -44,3 +45,5 @@ class bigint {
 
 std::ostream& operator<< (std::ostream& output, const bigint& src);
 int toInt(const bigint& src);
+
+#endif

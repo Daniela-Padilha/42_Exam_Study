@@ -93,7 +93,7 @@ bigint bigint::operator+ (const bigint& other) const
 		if (i >= 0)
 			sum += this->_nbr[i--] - '0';
 		if (j >= 0)
-			sum += this->_nbr[j--] - '0';
+			sum += other._nbr[j--] - '0';
 		res.push_back((sum % 10) + '0');
 		carry = sum / 10;
 	}
@@ -109,16 +109,15 @@ bigint& bigint::operator+= (const bigint& other)
 
 bigint bigint::operator<< (const bigint& src) const
 {
-	bigint tmp = *this;
-	tmp << toInt(src);
-	return tmp;
+	std::string res = this->getNbrs();
+	res.append(toInt(src), '0');
+	return bigint(res);
 }
 
 bigint bigint::operator>> (const bigint& src) const
 {
-	bigint tmp = *this;
-	tmp << toInt(src);
-	return tmp;
+	std::string res = this->_nbr.substr(0, (this->_nbr.size() - toInt(src)));
+	return bigint(res);
 }
 
 bigint& bigint::operator<<= (const bigint& src)
