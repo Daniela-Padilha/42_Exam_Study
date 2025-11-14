@@ -1,0 +1,1 @@
+This directory does not show the simplest solution for this exercise. This resolution was a step in my study process to better understand how the game of life works.
