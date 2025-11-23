@@ -62,7 +62,6 @@ int main(int ac, char **av) {
 					new[y][x] = 1;
 				else
 					new[y][x] = 0;
-
 			}
 		}
 		//copy the new board into main board
@@ -75,7 +74,7 @@ int main(int ac, char **av) {
 	for (int i = 0; i < height ; i++)
 	{
 		for(int j = 0; j < width ; j++)
-			putchar(board[i][j] ? '0' : ' ');
+			putchar(board[i][j] ? 'O' : ' ');
 		putchar('\n');
 	}
 }
