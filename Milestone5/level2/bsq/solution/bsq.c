@@ -55,12 +55,12 @@ void solve_bsq(t_bsq *bsq) {
 			else if (i == 0 || j == 0)
 				board[i][j] = 1;
 			else
-				board[i][j] = min3(board[i - 1][j], board[i][j - 1], board[i - 1][j - 1]) + 1;
+				board[i][j] = min(board[i - 1][j], board[i][j - 1], board[i - 1][j - 1]) + 1;
 			if (board[i][j] > max)
 			{
 				max = board[i][j];
-				max_x = i;
-				max_y = j;
+				max_x = j;
+				max_y = i;
 			}
 		}
 	}
@@ -70,14 +70,14 @@ void solve_bsq(t_bsq *bsq) {
 	int end_x = start_x + max;
 	int end_y = start_y + max;
 
-	for (int i = start_x; i < end_x; i++)
-		for (int j = start_y; j < end_y; j++)
+	for (int i = start_y; i < end_y; i++)
+		for (int j = start_x; j < end_x; j++)
 			bsq->map[i][j] = bsq->full;
 }
 
 int check_chars(t_bsq *bsq, char *line) {
 	for (int i = 0; line[i]; i++) {
-		if (line[i] != bsq->empt || line[i] != bsq->obs)
+		if (line[i] != bsq->empt && line[i] != bsq->obs)
 			return 0;
 	}
 	return 1;
@@ -85,7 +85,7 @@ int check_chars(t_bsq *bsq, char *line) {
 
 int parse_map(t_bsq *bsq, FILE *file) {
 	bsq->map = malloc(sizeof(char *) * bsq->lines);
-	if (bsq->map)
+	if (!bsq->map)
 		return 0;
 	for (int i = 0; i < bsq->lines; i++) {
 		char 	*line = NULL;
@@ -109,7 +109,7 @@ int parse_map(t_bsq *bsq, FILE *file) {
 }
 
 int parse_header(t_bsq *bsq, FILE *file) {
-	if (fscanf(file, "%i%c%c%c\n", bsq->lines, bsq->empt, bsq->obs, bsq->full) != 4)
+	if (fscanf(file, "%i%c%c%c\n", &bsq->lines, &bsq->empt, &bsq->obs, &bsq->full) != 4)
 		return 0;
 	if (bsq->lines <= 0)
 		return 0;
