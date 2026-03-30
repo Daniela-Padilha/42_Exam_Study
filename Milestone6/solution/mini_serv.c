@@ -18,7 +18,7 @@ fd_set activefds, readfds, writefds;
 int max_fd = 0;
 int	c_id = 0;
 t_clients clients[1024]; // default maximum number of open fds on Linux
-char buffer_r[120000], buffer_w[120000];
+char *buffer_r[120000], buffer_w[120000];
 
 
 // print to stderr

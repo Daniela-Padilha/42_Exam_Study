@@ -4,46 +4,71 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <sys/select.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <sys/select.h>
 
-typedef struct s_clients {
-	int	id;
-	char *msg;
-} t_clients;
+int id[200000], max = 0, next_id = 0;
+fd_set activefds, writefds, readfds;
+char *msg[200000], buffer_r[200000], buffer_w[200000];
 
-// global variables
-fd_set activefds, readfds, writefds;
-int max_fd = 0;
-int	c_id = 0;
-t_clients clients[1024]; // default maximum number of open fds on Linux
-char buffer_r[120000], buffer_w[120000];
-
-
-// print to stderr
-void err(int fatal)
+void err(int flag)
 {
 	char *str;
 	int len;
 
-	if (fatal == 1)
-		str = "Fatal error\n";
-	else if (fatal == 0)
+	if (flag == 0)
 		str = "Wrong number of arguments\n";
+	else if (flag == 1)
+		str = "Fatal error\n";
 	len = strlen(str);
-	write(STDERR_FILENO, str, len);
+	write(2, str, len);
 	exit(1);
 }
 
-// send msg to all clients
-void broadcast(int sender_fd, char *str)
+void broadcast(int sender_fd, char *buff)
 {
-	for (int i = 0; i <= max_fd; i++)
+	for (int i = 0; i <= max; i++)
 	{
-		//if current fd is not sender and is in writefds
-		if (FD_ISSET(i, &writefds) && i != sender_fd)
-			send(i, str, strlen(str), 0);
+		if (i != sender_fd && FD_ISSET(i, &writefds))
+			send(i, buff, strlen(buff), 0);
+	}
+	bzero(&buff, sizeof(buff));
+}
+
+void add_client(int fd)
+{
+	if (fd > max)
+		max = fd;
+	id[fd] = next_id++;
+	msg[fd] = NULL;
+	FD_SET(fd, &activefds);
+	sprintf(buffer_w, "server: client %d just arrived\n", id[fd]);
+	broadcast(fd, buffer_w);
+}
+
+void rm_client(int fd)
+{
+	sprintf(buffer_w, "server: client %d just left\n", id[fd]);
+	broadcast(fd, buffer_w);
+	id[fd] = -1;
+	if (msg[fd])
+		free(msg[fd]);
+	msg[fd] = NULL;
+	FD_CLR(fd, &activefds);
+	close(fd);
+}
+
+void send_msg(int fd)
+{
+	char *buff;
+
+	while(extract_message(&msg[fd], &buff) == 1)
+	{
+		sprintf(buffer_w, "client %d: ", id[fd]);
+		broadcast(fd, buffer_w);
+		broadcast(fd, buff);
+		free(buff);
 	}
 }
 
@@ -95,116 +120,77 @@ char *str_join(char *buf, char *add)
 }
 
 
-int main(int ac, char **av)
-{
+int main(int ac, char **av) {
 	int sockfd;
-	struct sockaddr_in servaddr;
+	struct sockaddr_in servaddr, cli;
 
-	// arg validation
 	if (ac != 2)
 		err(0);
-	
-	// init clients.msg
-	for (int i = 0; i < 1024; i++)
-    	clients[i].msg = NULL;
 
-	// socket creation
+	// socket create and verification 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0); 
 	if (sockfd == -1)
 		err(1);
-	
-	// clear activefds and add sockfd to fd_set struct
-	max_fd = sockfd;
+	bzero(&servaddr, sizeof(servaddr));
+	bzero(&cli, sizeof(cli));
+	bzero(&buffer_w, sizeof(buffer_w));
 	FD_ZERO(&activefds);
-	FD_SET(sockfd, &activefds);
 
-	// assign IP and PORT
+	// assign IP, PORT
 	servaddr.sin_family = AF_INET; 
 	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
 	servaddr.sin_port = htons(atoi(av[1]));
-	socklen_t len = sizeof(servaddr);
 
-	// Bind newly created socket to IP and PORT
+	// Binding newly created socket to given IP and verification 
 	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
 		err(1);
-
-	// set socket as ready to listen for clients
 	if (listen(sockfd, 10) != 0)
 		err(1);
+
+	FD_SET(sockfd, &activefds);
+	max = sockfd;
 	
-	// main loop
 	while (1)
 	{
-		// readfds and writefds are modified by select()
-		// activefds stores the real nbr of active clients
-		readfds = writefds = activefds;
-
-		//  monitor clients activity
-		if (select(max_fd + 1, &readfds, &writefds, 0, 0) == -1)
+		writefds = readfds = activefds;
+		if (select(max + 1, &readfds, &writefds, NULL, NULL) == -1)
 			continue;
-
-		// loop trough all fds
-		for (int fd = 0; fd <= max_fd; fd++)
+		for (int fd = 0; fd <= max; fd++) 
 		{
-			// check if current fd is present in fd_set
-			// if not present skip
-			if (FD_ISSET(fd, &readfds) == 0)
+			if (!FD_ISSET(fd, &readfds))
 				continue;
-			
-			// if the current fd is the server
+			//is server, accept clients
 			if (fd == sockfd)
 			{
-				// await a connection and create new socket for client
-				int clientfd = accept(sockfd, (struct sockaddr *)&servaddr, &len);
+				socklen_t len = sizeof(cli);
+				int clientfd = accept(sockfd, (struct sockaddr *)&cli, &len);
 				if (clientfd < 0)
 					continue;
-				
-				// if a connection/msg is recieved
-				if (clientfd > max_fd)
-					max_fd = clientfd;
-				clients[clientfd].id = c_id++;
-				FD_SET(clientfd, &activefds);
-				sprintf(buffer_w, "server: client %d just arrived\n", clients[clientfd].id);
-				broadcast(clientfd, buffer_w);
+				add_client(clientfd);
+				break ;
 			}
 
-			// if the current fd is a client
-			else
-			{
-				int read = recv(fd, buffer_r, 100000, 0);
-				if (read > 0)
-					buffer_r[read] = 0;
+			//is client
+			else {
+				bzero(&buffer_r, sizeof(buffer_r));
+				int read = recv(fd, buffer_r, sizeof(buffer_r), 0);
 				
-				// if error or client disconnected
+				//disconnect
 				if (read <= 0)
 				{
-					sprintf(buffer_w, "server: client %d just left\n", clients[fd].id);
-					broadcast(fd, buffer_w);
-					FD_CLR(fd, &activefds);
-					close(fd);
-					if (clients[fd].msg)
-					{
-						free(clients[fd].msg);
-						clients[fd].msg = NULL;
-					}
+					rm_client(fd);
+					break ;
 				}
 
-				// if client sent msg
+				//send message to server
 				else
 				{
-					clients[fd].msg = str_join(clients[fd].msg, buffer_r);
-					if (!clients[fd].msg)
-						err(1);
-					char *msg;
-					while (extract_message(&clients[fd].msg, &msg) == 1)
-					{
-						sprintf(buffer_w, "client %d: %s", clients[fd].id, msg);
-						broadcast(fd, buffer_w);
-						free(msg);
-					}
+					buffer_r[read] = 0;
+					msg[fd] = str_join(msg[fd], buffer_r);
+					send_msg(fd);
 				}
 			}
 		}
 	}
-	return (0);
+	return 0;
 }
