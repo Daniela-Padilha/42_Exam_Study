@@ -10,7 +10,7 @@
 
 typedef struct s_clients {
 	int	id;
-	char msg[100000];
+	char *msg;
 } t_clients;
 
 // global variables
@@ -47,6 +47,54 @@ void broadcast(int sender_fd, char *str)
 	}
 }
 
+int extract_message(char **buf, char **msg)
+{
+	char	*newbuf;
+	int	i;
+
+	*msg = 0;
+	if (*buf == 0)
+		return (0);
+	i = 0;
+	while ((*buf)[i])
+	{
+		if ((*buf)[i] == '\n')
+		{
+			newbuf = calloc(1, sizeof(*newbuf) * (strlen(*buf + i + 1) + 1));
+			if (newbuf == 0)
+				return (-1);
+			strcpy(newbuf, *buf + i + 1);
+			*msg = *buf;
+			(*msg)[i + 1] = 0;
+			*buf = newbuf;
+			return (1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+char *str_join(char *buf, char *add)
+{
+	char	*newbuf;
+	int		len;
+
+	if (buf == 0)
+		len = 0;
+	else
+		len = strlen(buf);
+	newbuf = malloc(sizeof(*newbuf) * (len + strlen(add) + 1));
+	if (newbuf == 0)
+		return (0);
+	newbuf[0] = 0;
+	if (buf != 0)
+		strcat(newbuf, buf);
+	free(buf);
+	strcat(newbuf, add);
+	return (newbuf);
+}
+
+
 int main(int ac, char **av)
 {
 	int sockfd;
@@ -55,6 +103,10 @@ int main(int ac, char **av)
 	// arg validation
 	if (ac != 2)
 		err(0);
+	
+	// init clients.msg
+	for (int i = 0; i < 1024; i++)
+    	clients[i].msg = NULL;
 
 	// socket creation
 	sockfd = socket(AF_INET, SOCK_STREAM, 0); 
@@ -120,6 +172,8 @@ int main(int ac, char **av)
 			else
 			{
 				int read = recv(fd, buffer_r, 100000, 0);
+				if (read > 0)
+					buffer_r[read] = 0;
 				
 				// if error or client disconnected
 				if (read <= 0)
@@ -128,28 +182,25 @@ int main(int ac, char **av)
 					broadcast(fd, buffer_w);
 					FD_CLR(fd, &activefds);
 					close(fd);
+					if (clients[fd].msg)
+					{
+						free(clients[fd].msg);
+						clients[fd].msg = NULL;
+					}
 				}
 
 				// if client sent msg
 				else
 				{
-					for (int i = 0, j = strlen(clients[fd].msg); i < read; i++, j++)
+					clients[fd].msg = str_join(clients[fd].msg, buffer_r);
+					if (!clients[fd].msg)
+						err(1);
+					char *msg;
+					while (extract_message(&clients[fd].msg, &msg) == 1)
 					{
-						//append the msg inside buffer_r to clients.msg
-						clients[fd].msg[j] = buffer_r[i];
-
-						// look for \n
-						if (clients[fd].msg[j] == '\n')
-						{
-							// replace \n with NULL
-							clients[fd].msg[j] = 0;
-							sprintf(buffer_w, "client %d: %s\n", clients[fd].id, clients[fd].msg);
-							broadcast(fd, buffer_w);
-							
-							//clear clients.msg before writing next line
-							memset(clients[fd].msg, 0, sizeof(clients[fd].msg));
-							j = -1;
-						}
+						sprintf(buffer_w, "client %d: %s", clients[fd].id, msg);
+						broadcast(fd, buffer_w);
+						free(msg);
 					}
 				}
 			}
